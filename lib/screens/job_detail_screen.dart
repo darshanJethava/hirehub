@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
 import '../models/job_model.dart';
 
 class JobDetailScreen extends StatelessWidget {
@@ -10,6 +11,32 @@ class JobDetailScreen extends StatelessWidget {
 
   bool _isHtml(String text) {
     return RegExp(r'<[^>]*>').hasMatch(text);
+  }
+
+  Future<void> launchJobUrl(String url) async {
+    if (url.isEmpty || url.trim().isEmpty) {
+      Get.snackbar(
+        'Info',
+        'No application URL available',
+      );
+      return;
+    }
+
+    print('Job URL: $url');
+
+    final Uri uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        'Could not open application link',
+      );
+    }
   }
 
   @override
@@ -188,13 +215,7 @@ class JobDetailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () async {
-                        final url = Uri.parse(job.url);
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url,
-                              mode: LaunchMode.externalApplication);
-                        }
-                      },
+                      onPressed: () => launchJobUrl(job.url),
                       child: const Text(
                         'Apply Now',
                         style: TextStyle(
@@ -215,4 +236,3 @@ class JobDetailScreen extends StatelessWidget {
     );
   }
 }
-
